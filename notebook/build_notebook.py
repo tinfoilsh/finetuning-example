@@ -129,7 +129,7 @@ A plain PyTorch loop, so there is nothing hidden: forward, backward, clip, step.
 from IPython.display import clear_output, display
 from transformers import get_linear_schedule_with_warmup
 
-EPOCHS, BATCH_SIZE, LEARNING_RATE = 3, 8, 2e-4
+EPOCHS, BATCH_SIZE, LEARNING_RATE = 5, 4, 2e-4
 
 trainable = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.AdamW(trainable, lr=LEARNING_RATE, weight_decay=0.0)
