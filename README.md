@@ -57,7 +57,7 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
 
 4. **Release** (forks only): `gh workflow run tinfoil-release.yml -f version=v0.1.0`. The workflow
    builds the image, pins its digest into `tinfoil-config.yml`, tags the release and publishes the
-   enclave measurement.
+   enclave measurement. Steps 3 and 4 can also be done [from the dashboard](#using-the-dashboard).
 
 5. **Deploy.**
 
@@ -77,6 +77,21 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
    ```
 
    Run the cells top to bottom. `notebook/finetune.ipynb` is the same file, if you want to read it first.
+
+## Using the dashboard
+
+Model wrapping and releases do not need the CLI. In the [Tinfoil dashboard](https://dashboard.tinfoil.sh),
+open **Containers**:
+
+- **Models** tab: enter `google/gemma-4-E2B-it`, pin the revision to
+  `3e22461f65e89153144f8adb70e3b8c2cc9845a7`, pick your build host and click **Prepare weights**. Once
+  the wrap completes, **Copy YAML** gives you the `models:` block; it should match the one already in
+  `tinfoil-config.yml`.
+- **Repositories** tab: connect your GitHub account if you have not yet, select your fork and click
+  **Release**. Enter a version such as `v0.1.0` and run the build. This triggers the same
+  `tinfoil-release.yml` workflow as the CLI step above. An org admin role is required to release.
+
+Secrets, deployment and the verified tunnel still go through the CLI as described above.
 
 ## What is where
 
@@ -107,4 +122,13 @@ notebook reloads the saved adapter after a restart.
 To keep the key out of Tinfoil's hands entirely, release both secrets from your own
 [keyserver](https://docs.tinfoil.sh/containers/private-secrets) by setting `keyserver-url` in the config.
 
-Apache-2.0.
+## Learn more
+
+- [Tinfoil Containers overview](https://docs.tinfoil.sh/containers/overview)
+- [`tinfoil` CLI reference](https://docs.tinfoil.sh/containers/cli)
+- [Verified model packs](https://docs.tinfoil.sh/containers/models)
+- [Private secrets and keyservers](https://docs.tinfoil.sh/containers/private-secrets)
+
+## License
+
+[Apache-2.0](LICENSE)
