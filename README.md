@@ -4,11 +4,26 @@ Fine-tune a language model on private data inside a [Tinfoil Container](https://
 from a Jupyter notebook. The base model is verified, the dataset and the resulting LoRA adapter
 live on an encrypted disk that survives restarts, and the enclave has no network egress.
 
-```
-laptop                                  enclave (1 GPU, no egress)
-  tinfoil container connect ─────────▶  JupyterLab  ──▶  /tinfoil/mpk/…   verified gemma-4-E2B-it (read-only)
-  browser: upload data, run cells ──▶              ──▶  /workspace        encrypted volume: data, adapters
-                                                          ▲ unlocked at boot with WORKSPACE_KEY (Tinfoil Secret)
+```mermaid
+flowchart LR
+    subgraph laptop[Laptop]
+        cli[tinfoil container connect]
+        browser[Browser: upload data, run cells]
+    end
+
+    subgraph enclave[Enclave: 1 GPU, no network egress]
+        jupyter[JupyterLab]
+        model[/"/tinfoil/mpk/…<br/>verified gemma-4-E2B-it (read-only)"/]
+        workspace[("/workspace<br/>encrypted volume: data, adapters")]
+    end
+
+    secret[WORKSPACE_KEY<br/>Tinfoil Secret]
+
+    browser --> cli
+    cli -- attested tunnel --> jupyter
+    jupyter -- loads --> model
+    jupyter -- reads / writes --> workspace
+    secret -. unlocks at boot .-> workspace
 ```
 
 The notebook loads `google/gemma-4-E2B-it` from a measured model pack, trains a LoRA adapter on a
@@ -42,7 +57,7 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
 
 4. **Release** (forks only): `gh workflow run tinfoil-release.yml -f version=v0.1.0`. The workflow
    builds the image, pins its digest into `tinfoil-config.yml`, tags the release and publishes the
-   enclave measurement.
+   enclave measurement. Steps 3 and 4 can also be done [from the dashboard](#using-the-dashboard).
 
 5. **Deploy.**
 
@@ -62,6 +77,21 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
    ```
 
    Run the cells top to bottom. `notebook/finetune.ipynb` is the same file, if you want to read it first.
+
+## Using the dashboard
+
+Model wrapping and releases do not need the CLI. In the [Tinfoil dashboard](https://dash.tinfoil.sh),
+open **Containers**:
+
+- **Models** tab: enter `google/gemma-4-E2B-it`, pin the revision to
+  `3e22461f65e89153144f8adb70e3b8c2cc9845a7`, pick your build host and click **Prepare weights**. Once
+  the wrap completes, **Copy YAML** gives you the `models:` block; it should match the one already in
+  `tinfoil-config.yml`.
+- **Repositories** tab: connect your GitHub account if you have not yet, select your fork and click
+  **Release**. Enter a version such as `v0.1.0` and run the build. This triggers the same
+  `tinfoil-release.yml` workflow as the CLI step above. An org admin role is required to release.
+
+Secrets, deployment and the verified tunnel still go through the CLI as described above.
 
 ## What is where
 
@@ -92,4 +122,13 @@ notebook reloads the saved adapter after a restart.
 To keep the key out of Tinfoil's hands entirely, release both secrets from your own
 [keyserver](https://docs.tinfoil.sh/containers/private-secrets) by setting `keyserver-url` in the config.
 
-Apache-2.0.
+## Learn more
+
+- [Tinfoil Containers overview](https://docs.tinfoil.sh/containers/overview)
+- [`tinfoil` CLI reference](https://docs.tinfoil.sh/containers/cli)
+- [Verified model packs](https://docs.tinfoil.sh/containers/models)
+- [Private secrets and keyservers](https://docs.tinfoil.sh/containers/private-secrets)
+
+## License
+
+[Apache-2.0](LICENSE)
