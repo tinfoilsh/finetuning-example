@@ -1,0 +1,56 @@
+# Private fine-tuning notebook on a Tinfoil Container.
+#
+# Everything in this file is part of the enclave measurement: the base model pack,
+# the notebook image, the encrypted workspace and the fact that the enclave has no
+# network egress at all. The two secrets are resolved at boot from your Tinfoil
+# organization (or from your own keyserver, see keyserver-url in the docs).
+cvm-version: 0.14.7
+cpus: 16
+memory: 65536
+gpus: 1
+
+# Verified base model weights, staged on the host with
+#   tinfoil model wrap google/gemma-4-E2B-it --commit 3e22461f65e89153144f8adb70e3b8c2cc9845a7 --host <host> --wait
+# The root hash is deterministic, so this block matches whatever host you wrap on.
+models:
+  - name: "gemma-4-e2b-it"
+    repo: "google/gemma-4-E2B-it@3e22461f65e89153144f8adb70e3b8c2cc9845a7"
+    mpk: "c9b7a21136a2ec7f9230e6afefc0b50673b3348b13d0f00543482c64776ca740_10278854656_f0227643-71bd-5544-be81-c2f777156167"
+
+# Encrypted, integrity-protected disk for your dataset, checkpoints and adapters.
+# It is unlocked during boot with the WORKSPACE_KEY secret (64 random bytes,
+# base64), formatted on first use, and survives restarts and updates. The key is
+# never handed to the container.
+volumes:
+  - name: workspace
+    key-secret: WORKSPACE_KEY
+
+containers:
+  - name: "notebook"
+    image: "ghcr.io/tinfoilsh/finetuning-example@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    runtime: nvidia
+    gpus: all
+    restart: always
+    env:
+      - MODEL_DIR: "/tinfoil/mpk/mpk-c9b7a21136a2ec7f9230e6afefc0b50673b3348b13d0f00543482c64776ca740"
+      - WORKSPACE: "/workspace"
+    secrets:
+      - JUPYTER_TOKEN
+    volumes:
+      - workspace:/workspace
+    tmpfs:
+      /tmp: size=16g,mode=1777,exec
+      /root: size=1g,mode=0700
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8888/api', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5m
+
+# No `networks:` block: the enclave cannot reach the internet. Data goes in and
+# out only through the notebook, over the attested TLS connection.
+shim:
+  upstream-port: 8888
+  paths:
+    - /*

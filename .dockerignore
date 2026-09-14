@@ -1,0 +1,9 @@
+.git
+.github
+.venv
+__pycache__
+.ipynb_checkpoints
+README.md
+LICENSE
+notebook/build_notebook.py
+data/make_dataset.py
