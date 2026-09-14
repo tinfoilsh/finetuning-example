@@ -8,6 +8,7 @@ FROM pytorch/pytorch:2.14.0-cuda13.0-cudnn9-runtime@sha256:9c99fafa01edfaa3d16da
 ARG SOURCE_REVISION=unversioned
 ARG VERSION=unversioned
 
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 RUN pip install --no-cache-dir \
       "transformers==5.17.0" \
       "peft==0.20.0" \
@@ -15,7 +16,7 @@ RUN pip install --no-cache-dir \
       "jupyterlab==4.6.3" \
       "ipywidgets==8.1.9" \
       "matplotlib==3.11.2" \
- && python -c "import torch, transformers, peft, jupyterlab; print(torch.__version__, transformers.__version__, peft.__version__)"
+ && python3 -c "import torch, transformers, peft, jupyterlab; print(torch.__version__, transformers.__version__, peft.__version__)"
 
 # The notebook and sample data are seeded into the encrypted workspace on first start.
 COPY notebook/finetune.ipynb /opt/example/finetune.ipynb
