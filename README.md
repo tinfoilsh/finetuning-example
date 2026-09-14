@@ -80,7 +80,7 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
 
 ## Using the dashboard
 
-Model wrapping and releases do not need the CLI. In the [Tinfoil dashboard](https://dashboard.tinfoil.sh),
+Model wrapping and releases do not need the CLI. In the [Tinfoil dashboard](https://dash.tinfoil.sh),
 open **Containers**:
 
 - **Models** tab: enter `google/gemma-4-E2B-it`, pin the revision to
