@@ -27,7 +27,7 @@ volumes:
 
 containers:
   - name: "notebook"
-    image: "ghcr.io/tinfoilsh/finetuning-example@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    image: "ghcr.io/tinfoilsh/finetuning-example@sha256:e569b78b788790d1df095cc2541cb6a10a118ae271277db995a6563a90001574" # v0.1.0
     runtime: nvidia
     gpus: all
     restart: always
