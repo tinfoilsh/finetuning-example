@@ -4,11 +4,26 @@ Fine-tune a language model on private data inside a [Tinfoil Container](https://
 from a Jupyter notebook. The base model is verified, the dataset and the resulting LoRA adapter
 live on an encrypted disk that survives restarts, and the enclave has no network egress.
 
-```
-laptop                                  enclave (1 GPU, no egress)
-  tinfoil container connect ─────────▶  JupyterLab  ──▶  /tinfoil/mpk/…   verified gemma-4-E2B-it (read-only)
-  browser: upload data, run cells ──▶              ──▶  /workspace        encrypted volume: data, adapters
-                                                          ▲ unlocked at boot with WORKSPACE_KEY (Tinfoil Secret)
+```mermaid
+flowchart LR
+    subgraph laptop[Laptop]
+        cli[tinfoil container connect]
+        browser[Browser: upload data, run cells]
+    end
+
+    subgraph enclave[Enclave: 1 GPU, no network egress]
+        jupyter[JupyterLab]
+        model[/"/tinfoil/mpk/…<br/>verified gemma-4-E2B-it (read-only)"/]
+        workspace[("/workspace<br/>encrypted volume: data, adapters")]
+    end
+
+    secret[WORKSPACE_KEY<br/>Tinfoil Secret]
+
+    browser --> cli
+    cli -- attested tunnel --> jupyter
+    jupyter -- loads --> model
+    jupyter -- reads / writes --> workspace
+    secret -. unlocks at boot .-> workspace
 ```
 
 The notebook loads `google/gemma-4-E2B-it` from a measured model pack, trains a LoRA adapter on a
