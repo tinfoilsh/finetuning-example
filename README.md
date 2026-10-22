@@ -52,7 +52,7 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
 
    ```sh
    tinfoil model wrap google/gemma-4-E2B-it --commit 3e22461f65e89153144f8adb70e3b8c2cc9845a7 \
-     --host control.<host>.tinfoil.sh --wait
+     --host <host> --wait
    ```
 
 4. **Release** (forks only): `gh workflow run tinfoil-release.yml -f version=v0.1.0`. The workflow
@@ -63,7 +63,7 @@ Tinfoil Containers, and a host with a free GPU (`tinfoil container hosts`).
 
    ```sh
    tinfoil container create finetune --repo <owner>/finetuning-example --tag v0.1.0 \
-     --host control.<host>.tinfoil.sh --secret JUPYTER_TOKEN --secret WORKSPACE_KEY
+     --host <host> --secret JUPYTER_TOKEN --secret WORKSPACE_KEY
    ```
 
    Ready takes a few minutes (image pull plus boot). `tinfoil container get finetune` shows the status.
